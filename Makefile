@@ -7,7 +7,7 @@ SRCDIR := $(BASEDIR)/src
 
 CCP := g++
 LD := ld
-CCFLAGS := -Wall
+CCFLAGS := -Wall -I $(SRCDIR)
 LDLIBS := -lc -lm
 LDFLAGS :=
 

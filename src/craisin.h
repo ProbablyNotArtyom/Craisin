@@ -16,15 +16,10 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include "iostream"
-	#include "fstream"
+#ifndef HEADER_CRAISIN
+#define HEADER_CRAISIN
 
-	#include "craisin.h"
 
-// ----------------------------------------------------------------------------
 
-using namespace std;
-int main(int argc, char *argv[]) {
-	printf("Craisin test.\n");
-	return 0;
-}
+
+#endif
