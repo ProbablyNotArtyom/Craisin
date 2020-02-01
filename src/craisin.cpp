@@ -16,15 +16,76 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include "iostream"
-	#include "fstream"
+	#include <iostream>
+	#include <fstream>
+	#include <unistd.h>
+	#include <string>
+	#include <getopt.h>
 
+	#include "cpu.h"
 	#include "craisin.h"
 
-// ----------------------------------------------------------------------------
+	using namespace std;
+	
+//-----------------------------------------------------------------------------
 
-using namespace std;
+static string helptxt = {
+	"Usage: craisin [options] [sources] \r\n"
+	"6502/65816 assembler supporting variable syntax\r\n"
+	"\r\n"
+	"  -h, --help           shows this help text\r\n"
+	"  -d, --debug          enables debug mode\r\n"
+	"  -v, --verbose        enables verbose logging\r\n"
+	"  -c, --cpu=CPU        uses CPU as the target processor\r\n"
+	"      --vice=FILE      outputs a VICE symbol file to FILE\r\n"
+};
+
+//-----------------------------------------------------------------------------
+
 int main(int argc, char *argv[]) {
-	printf("Craisin test.\n");
-	return 0;
+	bool debug = false;
+	bool verbose = false;
+	int opt;
+	int digit_optind = 0;
+	// Parse the command line options and handle and flags
+	while (1) {
+		int this_option_optind = optind ? optind : 1;
+	    int option_index = 0;
+	    static struct option long_options[] = {
+	        {"help", no_argument, 0, 'h'},
+	        {"debug", no_argument, 0, 'd'},
+	        {"verbose", no_argument, 0, 'v'},
+	        {"cpu", required_argument, 0, 'c'},
+	        {"vice", required_argument, 0, 0},
+	        {0, 0, 0, 0}
+	    };
+
+		opt = getopt_long(argc, argv, "hdvc:", long_options, &option_index);
+	    if (opt == -1) break;
+
+		switch (opt) {
+			default:
+			case 'h':
+				fprintf(stderr, "%s", helptxt.c_str());
+				exit(0);
+			case 'd':
+				debug = true;
+				break;
+			case 'v':
+			    verbose = true;
+			    break;
+			case 'c':
+				printf("CPU model: %s\n", optarg);
+			    break;
+			case 0:
+				/* Parse arguments that only have long forms */
+				if (long_options[option_index].name == "vice") {
+					printf("VICE output file: %s\n", optarg);
+				} else {
+
+				}
+				break;
+		}
+	}
 }
+

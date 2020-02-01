@@ -16,30 +16,19 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HEADER_CRAISIN
-#define HEADER_CRAISIN
+	#include <iostream>
+	#include <fstream>
+	#include <unistd.h>
 
-//-----------------------------------------------------------------------------
+	#include "cpu.h"
+	#include "craisin.h"
 
-/* The maximum depth that scopes can be nested */
-#define MAX_SCOPE_DEPTH		16
+// ----------------------------------------------------------------------------
 
-/* The maximum number of conditional statements that can be nested */
-#define MAX_COND_DEPTH		64
+const char *statusStrings[NUM_STATUSCODES] = {
+		"ok",
 
-//-----------------------------------------------------------------------------
-
-enum statusCode {
-	STATUS_OK,							// Normal idle status
-
-	STATUS_ERRORS,						// Marks where statuses get treated like errors
-	ERROR_INTERNAL = STATUS_ERRORS,		// Unknown internal error
-
-	NUM_STATUSCODES
+		"Internal Error"
 };
 
-//-----------------------------------------------------------------------------
-
-extern const char *statusStrings[NUM_STATUSCODES];
-
-#endif
+// ----------------------------------------------------------------------------

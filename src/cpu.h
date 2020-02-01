@@ -16,30 +16,23 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HEADER_CRAISIN
-#define HEADER_CRAISIN
+#ifndef HEADER_CPU
+#define HEADER_CPU
 
 //-----------------------------------------------------------------------------
 
-/* The maximum depth that scopes can be nested */
-#define MAX_SCOPE_DEPTH		16
-
-/* The maximum number of conditional statements that can be nested */
-#define MAX_COND_DEPTH		64
-
-//-----------------------------------------------------------------------------
-
-enum statusCode {
-	STATUS_OK,							// Normal idle status
-
-	STATUS_ERRORS,						// Marks where statuses get treated like errors
-	ERROR_INTERNAL = STATUS_ERRORS,		// Unknown internal error
-
-	NUM_STATUSCODES
+enum cpuModels {
+	CPU_6502,
+	CPU_6502_ILLEGAL,
+	CPU_65C02,
+	CPU_65C02_WDC,
+	CPU_65816
 };
 
 //-----------------------------------------------------------------------------
 
-extern const char *statusStrings[NUM_STATUSCODES];
+
+
+//-----------------------------------------------------------------------------
 
 #endif
