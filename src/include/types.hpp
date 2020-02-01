@@ -16,23 +16,28 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HEADER_CPU
-#define HEADER_CPU
+#ifndef HEADER_TYPES
+#define HEADER_TYPES
+
+#include <stdint.h>
+#include <string.h>
+#include <limits>
 
 //-----------------------------------------------------------------------------
 
-enum cpuModels {
-	CPU_6502,
-	CPU_6502_ILLEGAL,
-	CPU_65C02,
-	CPU_65C02_WDC,
-	CPU_65816
-};
+typedef uint16_t address_t;		// 16bit absolute address
+typedef uint8_t ubyte_t;		// 8bit byte
+typedef int8_t byte_t;			// 8bit byte, signed
 
-//-----------------------------------------------------------------------------
+inline ubyte_t get_lobyte(address_t addr) {
+	return static_cast<ubyte_t>(addr & 0xFF);
+}
 
-
+inline ubyte_t get_hibyte(address_t addr) {
+	return static_cast<ubyte_t>(addr >> 8);
+}
 
 //-----------------------------------------------------------------------------
 
 #endif
+

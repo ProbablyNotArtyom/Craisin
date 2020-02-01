@@ -4,10 +4,12 @@ BINARY_NAME := craisin
 BASEDIR := $(PWD)
 BINDIR := $(BASEDIR)/bin
 SRCDIR := $(BASEDIR)/src
+INCDIR := $(SRCDIR)/include
+TESTDIR := $(BASEDIR)/test
 
 CCP := g++
 LD := ld
-CCFLAGS := -Wall -I $(SRCDIR)
+CCFLAGS := -Wall -I $(INCDIR) -I $(SRCDIR)/parse
 LDLIBS := -lc -lm
 LDFLAGS :=
 
@@ -16,7 +18,7 @@ OBJECTS := $(patsubst $(BASEDIR)/%.cpp, $(BINDIR)/%.o, $(SOURCES))
 
 ########################################
 
-.PHONY: all clean run
+.PHONY: clean all clean run
 all:
 	@echo "[DEP] Setting up directories"
 	@mkdir -p $(BINDIR)
@@ -25,9 +27,14 @@ all:
 
 clean:
 	rm -rf $(BINDIR)/*
-
+	rm -f test/*.bin
 run:
 	$(BINDIR)/$(BINARY_NAME)
+
+sim-tests:
+	lwasm -o $(TESTDIR)/coco3.bin $(TESTDIR)/coco3.asm
+	xroar -rompath /mnt/Keep2/Projects/project-files/_Retro_/CoCo/ROMs/coco2/ -run $(TESTDIR)/coco3.bin
+	rm -f $(TESTDIR)/coco3.bin
 
 ########################################
 

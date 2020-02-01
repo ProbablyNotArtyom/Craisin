@@ -16,19 +16,19 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <iostream>
-	#include <fstream>
-	#include <unistd.h>
+#ifndef HEADER_ERROR
+#define HEADER_ERROR
 
-	#include <cpu.hpp>
-	#include <craisin.hpp>
+//-----------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
+typedef void (*craisin_error_fn)(const std::string error);
 
-const char *statusStrings[NUM_STATUSCODES] = {
-	"ok",
+//-----------------------------------------------------------------------------
 
-	"Internal Error"
-};
+void craisin_error(const std::string error);
+void set_error_fn(craisin_error_fn func);
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+#endif
+

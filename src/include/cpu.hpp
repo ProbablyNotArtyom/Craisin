@@ -16,19 +16,24 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <iostream>
-	#include <fstream>
-	#include <unistd.h>
+#ifndef HEADER_CPU
+#define HEADER_CPU
 
-	#include <cpu.hpp>
-	#include <craisin.hpp>
+//-----------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-
-const char *statusStrings[NUM_STATUSCODES] = {
-	"ok",
-
-	"Internal Error"
+enum cpuModels {
+	CPU_6502,
+	CPU_6502_ILLEGAL,
+	CPU_65C02,
+	CPU_65C02_WDC,
+	CPU_65816
 };
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+
+#endif
+

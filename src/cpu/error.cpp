@@ -16,30 +16,27 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HEADER_CRAISIN
-#define HEADER_CRAISIN
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <string>
+
+#include <craisin.hpp>
+#include <error.hpp>
 
 //-----------------------------------------------------------------------------
 
-/* The maximum depth that scopes can be nested */
-#define MAX_SCOPE_DEPTH		16
+using namespace std;
+static craisin_error_fn error_handler = nullptr;
+void craisin_error(const string error) {
+	if (error_handler) (*error_handler)(error);
+	else {
+		cerr << error.c_str();
+	}
+	exit(1);
+}
 
-/* The maximum number of conditional statements that can be nested */
-#define MAX_COND_DEPTH		64
+void set_error_fn(craisin_error_fn func) {
+	error_handler = func;
+}
 
-//-----------------------------------------------------------------------------
-
-enum statusCode {
-	STATUS_OK,							// Normal idle status
-
-	STATUS_ERRORS,						// Marks where statuses get treated like errors
-	ERROR_INTERNAL = STATUS_ERRORS,		// Unknown internal error
-
-	NUM_STATUSCODES
-};
-
-//-----------------------------------------------------------------------------
-
-extern const char *statusStrings[NUM_STATUSCODES];
-
-#endif

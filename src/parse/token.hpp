@@ -16,19 +16,34 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <iostream>
-	#include <fstream>
-	#include <unistd.h>
+#ifndef HEADER_TOKEN
+#define HEADER_TOKEN
 
-	#include <cpu.hpp>
-	#include <craisin.hpp>
+#include <string>
+#include <deque>
+#include "types.hpp"
+#include "expr.hpp"
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-const char *statusStrings[NUM_STATUSCODES] = {
-	"ok",
-
-	"Internal Error"
+class Token {
+public:
+	Token();
+	Token(expr_t type);
+	Token(int val);
+	Token(expr_t type, const std::string str);
+	
+	const expr_t 				get_type();
+	const std::string 			get_str();
+	const int					get_val();
+	const struct expr_operands	get_operands();
+private:
+	expr_t 					type;
+	std::string 			str;
+	int						val;
+	struct expr_operands 	*operators;
 };
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+#endif

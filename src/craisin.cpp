@@ -20,14 +20,33 @@
 	#include <fstream>
 	#include <unistd.h>
 	#include <string>
-	#include <getopt.h>
+	#include <list>
 
-	#include "cpu.h"
-	#include "craisin.h"
-
+	#include <argparse.hpp>
+	#include <cpu.hpp>
+	#include <craisin.hpp>
+	
+	#include "parse/expr.hpp"
+	#include "parse/token.hpp"
+	
 	using namespace std;
 	
 //-----------------------------------------------------------------------------
+
+struct assembler_pass {
+	const string	name;
+	const pass_fn_t	fn;
+	const int 		fordep;
+} passlist[] = {
+	{ string("parse"), nullptr, 1 },
+	{ string("symcheck"), nullptr, 0 },
+	{ string("resolve1"), nullptr, 0 },
+	{ string("resolve2"), nullptr, 0 },
+	{ string("addressresolve"), nullptr, 0 },
+	{ string("finalize"), nullptr, 0 },
+	{ string("emit"), nullptr, 0 },
+	{ string(), nullptr, 0 }
+};
 
 static string helptxt = {
 	"Usage: craisin [options] [sources] \r\n"
@@ -40,52 +59,56 @@ static string helptxt = {
 	"      --vice=FILE      outputs a VICE symbol file to FILE\r\n"
 };
 
+static struct option craisin_options[] = {
+	{"help", no_argument, 0, 'h'},
+	{"debug", no_argument, 0, 'd'},
+	{"verbose", no_argument, 0, 'v'},
+	{"cpu", required_argument, 0, 'c'},
+	{"vice", required_argument, 0, 0},
+	{0, 0, 0, 0}
+};
+
+bool flag_debug = false;
+bool flag_verbose = false;
+
 //-----------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-	bool debug = false;
-	bool verbose = false;
-	int opt;
-	int digit_optind = 0;
-	// Parse the command line options and handle and flags
+	// Parse the command line options and handle flags
 	while (1) {
-		int this_option_optind = optind ? optind : 1;
 	    int option_index = 0;
-	    static struct option long_options[] = {
-	        {"help", no_argument, 0, 'h'},
-	        {"debug", no_argument, 0, 'd'},
-	        {"verbose", no_argument, 0, 'v'},
-	        {"cpu", required_argument, 0, 'c'},
-	        {"vice", required_argument, 0, 0},
-	        {0, 0, 0, 0}
-	    };
-
-		opt = getopt_long(argc, argv, "hdvc:", long_options, &option_index);
+		int opt = argparse_long(argc, argv, "hdvc:", craisin_options, &option_index);
 	    if (opt == -1) break;
 
 		switch (opt) {
 			default:
 			case 'h':
-				fprintf(stderr, "%s", helptxt.c_str());
+				cerr << helptxt;
 				exit(0);
 			case 'd':
-				debug = true;
+				flag_debug = true;
 				break;
 			case 'v':
-			    verbose = true;
+				flag_verbose = true;
 			    break;
 			case 'c':
-				printf("CPU model: %s\n", optarg);
+				if (flag_debug) cout << "CPU model: " << optarg << "\n";
 			    break;
 			case 0:
 				/* Parse arguments that only have long forms */
-				if (long_options[option_index].name == "vice") {
-					printf("VICE output file: %s\n", optarg);
-				} else {
-
+				if (craisin_options[option_index].name == string("vice")) {
+					if (flag_debug) cout << "VICE output file: "<< optarg << "\n";
 				}
 				break;
 		}
 	}
+	
+	// Crasin now begins
+	for (int pass = 0; !passlist[pass].name.empty(); pass++) {
+		if (flag_debug) cout << passlist[pass].name << '\n';
+	}
 }
+
+
+
 
