@@ -16,19 +16,27 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <iostream>
-	#include <fstream>
-	#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <string>
 
-	#include <cpu.hpp>
-	#include <craisin.hpp>
+#include <craisin.hpp>
+#include <error.hpp>
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-const char *statusStrings[NUM_STATUSCODES] = {
-	"ok",
+using namespace std;
+static craisin_error_fn error_handler = nullptr;
+void craisin_error(const string error) {
+	if (error_handler) (*error_handler)(error);
+	else {
+		cerr << error.c_str();
+	}
+	exit(1);
+}
 
-	"Internal Error"
-};
+void set_error_fn(craisin_error_fn func) {
+	error_handler = func;
+}
 
-// ----------------------------------------------------------------------------
