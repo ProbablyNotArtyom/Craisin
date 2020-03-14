@@ -70,6 +70,7 @@ static struct option craisin_options[] = {
 
 bool flag_debug = false;
 bool flag_verbose = false;
+cpu_model_t craisin_cpu_model;
 
 //-----------------------------------------------------------------------------
 
@@ -92,8 +93,14 @@ int main(int argc, char *argv[]) {
 				flag_verbose = true;
 			    break;
 			case 'c':
-				if (flag_debug) cout << "CPU model: " << optarg << "\n";
-			    break;
+				craisin_cpu_model = cpu_get_model(optarg);
+				if (craisin_cpu_model == CPU_INVALID) {
+					cerr << "[!] Invalid CPU model";
+					exit(0);
+				} else if (flag_debug) {
+					cout << "CPU model: " << cpu_get_model_string(craisin_cpu_model) << "\n";
+				}
+				break;
 			case 0:
 				/* Parse arguments that only have long forms */
 				if (craisin_options[option_index].name == string("vice")) {

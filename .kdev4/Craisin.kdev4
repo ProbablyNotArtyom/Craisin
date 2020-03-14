@@ -23,8 +23,10 @@ Name=GCC
 
 [CustomDefinesAndIncludes][ProjectPath0][Includes]
 1=/mnt/Keep2/Projects/builds/Craisin/src/include
-2=/mnt/Keep2/Projects/builds/Craisin/src/cpu
+2=/mnt/Keep2/Projects/builds/Craisin/src
 3=/mnt/Keep2/Projects/builds/Craisin/src/parse
+4=/mnt/Keep2/Projects/builds/Craisin/src/cpu
+5=/mnt/Keep2/Projects/builds/Craisin/src/include/cpu.hpp
 
 [Launch]
 Launch Configurations=Launch Configuration 0
@@ -36,7 +38,7 @@ Name=New Compiled Binary Launcher
 Type=Native Application
 
 [Launch][Launch Configuration 0][Data]
-Arguments=-h
+Arguments=-d -c6502 ./test/coco3.asm
 Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
 Dependency Action=Nothing
 EnvironmentGroup=

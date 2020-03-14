@@ -19,19 +19,25 @@
 #ifndef HEADER_CPU
 #define HEADER_CPU
 
+#include <string>
+
 //-----------------------------------------------------------------------------
 
-enum cpuModels {
+#define NUM_CPU_MODELS	6
+typedef enum {
+	CPU_INVALID = 0,
 	CPU_6502,
 	CPU_6502_ILLEGAL,
 	CPU_65C02,
 	CPU_65C02_WDC,
 	CPU_65816
-};
+} cpu_model_t;
+extern const std::string cpuModels_tbl[NUM_CPU_MODELS];
 
 //-----------------------------------------------------------------------------
 
-
+cpu_model_t cpu_get_model(std::string model_name);
+std::string cpu_get_model_string(cpu_model_t model);
 
 //-----------------------------------------------------------------------------
 
