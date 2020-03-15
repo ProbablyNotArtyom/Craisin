@@ -44,6 +44,97 @@ private:
 	struct expr_operands 	*operators;
 };
 
+typedef enum {
+	TOKEN_VOID = -2,
+	TOKEN_EOF  = -1,
+	TOKEN_ERROR = 0,
+	TOKEN_BLOCK_END,
+	TOKEN_OUTDENT,
+	TOKEN_ID,
+	TOKEN_INT,
+	TOKEN_STRING,
+	
+	// Single character tokens (any ascii character is token)
+	
+	TOKEN_EOL = 10,
+	TOKEN_ADR = '@',
+	TOKEN_EQUAL = '=',
+	TOKEN_HIGHER = '>',
+	TOKEN_LOWER = '<',
+	TOKEN_COMMA = ',',
+	TOKEN_COLON = ':',
+	TOKEN_PERCENT = '%',
+	TOKEN_OPEN_P  = '(',
+	TOKEN_CLOSE_P = ')',
+	TOKEN_PLUS = '+',
+	TOKEN_MINUS = '-',
+	TOKEN_MUL = '*',
+	TOKEN_DIV = '/',
+	TOKEN_DOT = '.',
+	TOKEN_HASH = '#',
+	TOKEN_DOLLAR = '$',
+	TOKEN_BYTE_INDEX = TOKEN_DOLLAR,
+	
+	// Keyword tokens
+	
+	TOKEN_KEYWORD = 128,
+	TOKEN_GOTO    = 128,
+	TOKEN_IF,
+	TOKEN_UNLESS,
+	TOKEN_THEN,
+	TOKEN_ELSE,
+	TOKEN_PROC,
+	TOKEN_RULE,
+	TOKEN_MACRO,
+	TOKEN_AND,
+	TOKEN_OR,
+	TOKEN_NOT,
+	TOKEN_SQRT,
+	TOKEN_WHILE,
+	TOKEN_UNTIL,
+	TOKEN_WHERE,
+	TOKEN_CONST,
+	TOKEN_ENUM,
+	TOKEN_ARRAY,
+	TOKEN_TYPE2,			// this should be TOKEN_TYPE, but there was conflict with windows.h include on Windows
+	TOKEN_FILE,
+	TOKEN_LO,
+	TOKEN_HI,
+	TOKEN_OF,
+	TOKEN_FOR,
+	TOKEN_IN,
+	TOKEN_OUT,
+	TOKEN_PARAM,
+	TOKEN_INSTR,
+	TOKEN_TIMES,
+	TOKEN_ADR2,
+	TOKEN_DEBUG,
+	TOKEN_MOD,
+	TOKEN_BITNOT,
+	TOKEN_BITAND,
+	TOKEN_BITOR,
+	TOKEN_BITXOR,
+	TOKEN_STRUCT,
+	TOKEN_USE,
+	TOKEN_REF,
+	TOKEN_STEP,
+	TOKEN_RETURN,
+	TOKEN_SCOPE,
+	TOKEN_SEQUENCE,
+	TOKEN_ASSERT,
+	TOKEN_EITHER,
+	TOKEN_STRING_TYPE,
+	TOKEN_LAST_KEYWORD = TOKEN_STRING_TYPE,
+	
+	// two character tokens
+	TOKEN_LOWER_EQUAL,
+	TOKEN_HIGHER_EQUAL,
+	TOKEN_NOT_EQUAL,
+	TOKEN_DOTDOT,
+	TOKEN_RIGHT_ARROW,
+	TOKEN_HORIZ_RULE
+} token_t;
+
 //-----------------------------------------------------------------------------
 
 #endif

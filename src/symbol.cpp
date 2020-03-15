@@ -16,27 +16,23 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
-#include <string>
+	#include <language.hpp>
+	#include <ctype.h>
+	#include <iostream>
+	#include <fstream>
+	#include <unistd.h>
+	#include <string.h>
+	#include <list>
 
-#include <craisin.hpp>
-#include <error.hpp>
+	#include <argparse.hpp>
+	#include <cpu.hpp>
+	#include <craisin.hpp>
+
+	using namespace std;
+// 	
+//-----------------------------------------------------------------------------	
+	
+craisin_symbol_t *register_symbol(craisin_state_t *as, line_t *cl, char *sym, expr_t value, int flags) { }
+craisin_symbol_t *lookup_symbol(craisin_state_t *as, line_t *cl, char *sym) { }
 
 //-----------------------------------------------------------------------------
-
-using namespace std;
-static craisin_error_fn error_handler = nullptr;
-void craisin_error(const string error) {
-	if (error_handler) (*error_handler)(error);
-	else {
-		cerr << error.c_str();
-	}
-	exit(1);
-}
-
-void set_error_fn(craisin_error_fn func) {
-	error_handler = func;
-}
-

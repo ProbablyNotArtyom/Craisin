@@ -25,6 +25,7 @@
 	#include <argparse.hpp>
 	#include <cpu.hpp>
 	#include <craisin.hpp>
+	#include <error.hpp>
 	
 	#include "parse/expr.hpp"
 	#include "parse/token.hpp"
@@ -116,6 +117,20 @@ int main(int argc, char *argv[]) {
 	}
 }
 
+void skip_operand_real(line_t *cl, char **p) {
+	if (CURPRAGMA(cl, PRAGMA_NEWSOURCE)) return;
+	for (; **p && !isspace(**p); (*p)++);
+}
 
 
+void input_init(craisin_state_t *as) { }
+void input_openstring(craisin_state_t *as, char *s, char *str) { }
+void input_open(craisin_state_t *as, char *s) { }
+char *input_readline(craisin_state_t *as) { }
+char *input_curspec(craisin_state_t *as) { }
+FILE *input_open_standalone(craisin_state_t *as, char *s, char **rfn) { }
+int input_isinclude(craisin_state_t *as) { }
 
+int craisin_next_context(craisin_state_t *as) { }
+void craisin_emit(line_t *cl, int byte) { }
+void craisin_emitop(line_t *cl, int opc) { }

@@ -22,6 +22,7 @@
 	#include <stack>
 	#include <list>
 	#include <expr.hpp>
+	#include <error.hpp>
 	
 //-----------------------------------------------------------------------------
 
@@ -38,17 +39,8 @@
 
 //-----------------------------------------------------------------------------
 
-typedef enum {
-	STATUS_OK,							// Normal idle status
-
-	STATUS_ERRORS,						// Marks where statuses get treated like errors
-	ERROR_INTERNAL = STATUS_ERRORS,		// Unknown internal error
-
-	NUM_STATUSCODES
-} error_code_t;
-
 struct craisin_error {
-	error_code_t	code;
+	errorcode_t		code;
 	std::string 	message;
 	int 			index;
 };
@@ -75,6 +67,11 @@ enum {
 	PRAGMA_EXPORT_ALL			= 1<<5,		// Export all symbols
 	PRAGMA_IMPORT_UNDEF			= 1<<6,		// Import symbols that are undefined when exporting
 	
+	PRAGMA_CESCAPES				= 1<<7,		// Interpret C style escape sequences in strings
+	PRAGMA_TESTMODE				= 1<<8,		// Enable testmode
+	PRAGMA_NEWSOURCE			= 1<<9,		
+	PRAGMA_CLEARBIT				= 1<<10,
+	
 	PRAGMA_NEGATED				= 1<<31		// Pragma flag test bit
 } pragma_t;
 
@@ -86,6 +83,12 @@ typedef enum {
 	section_flag_constant = 2,			// constants - no base offset
 	section_flag_none = 0				// no flags
 } secflag_t;
+
+typedef enum {
+	TF_NONE = 0,
+	TF_EMIT = 1,
+	TF_ERROR = 2
+} craisin_testflags_t;
 
 typedef std::list<struct craisin_section> sectionlist_t;
 typedef struct craisin_section craisin_section_t;
@@ -131,7 +134,7 @@ struct craisin_symbol {
 
 struct sym_export {
 	std::string	name;					// symbol to export
-	struct symtabe *se;					// symbol table entry
+	struct craisin_symbol *se;					// symbol table entry
 	line_t *line;						// line the export is on
 };
 
@@ -186,7 +189,7 @@ struct craisin_line {
 	int fcc_extras;						// fcc extra bytes
 	errorlist_t *err;					// list of errors
 	errorlist_t *warn;					// list of errors
-	error_code_t err_testmode;			// error code in testmode
+	errorcode_t err_testmode;			// error code in testmode
 	line_t *prev;						// previous line
 	line_t *next;						// next line
 	int inmod;							// inside a module?
@@ -275,9 +278,44 @@ struct craisin_state {
 
 typedef void (*const pass_fn_t)(craisin_state_t *as);
 
+#define PARSEFUNC(fn)	void (fn)(craisin_state_t *as, line_t *l, char **p)
+#define RESOLVEFUNC(fn)	void (fn)(craisin_state_t *as, line_t *l, int force)
+#define EMITFUNC(fn)	void (fn)(craisin_state_t *as, line_t *l)
+
+#define CURPRAGMA(l,p)	(((l) && ((l)->pragmas & (p))) ? 1 : 0)
+/* this macro can only be used where "l" is the current line pointer */
+void skip_operand_real(line_t *cl, char **p);
+#define skip_operand(p) skip_operand_real(l, p)
+
 //-----------------------------------------------------------------------------
 
-extern const char *statusStrings[NUM_STATUSCODES];
+craisin_symbol_t *register_symbol(craisin_state_t *as, line_t *cl, char *sym, expr_t value, int flags);
+craisin_symbol_t *lookup_symbol(craisin_state_t *as, line_t *cl, char *sym);
+void register_struct_entry(craisin_state_t *as, line_t *l, int size, craisin_struct_t *ss);
+
+int parse_pragma_helper(char *p);
+
+void input_init(craisin_state_t *as);
+void input_openstring(craisin_state_t *as, char *s, char *str);
+void input_open(craisin_state_t *as, char *s);
+char *input_readline(craisin_state_t *as);
+char *input_curspec(craisin_state_t *as);
+FILE *input_open_standalone(craisin_state_t *as, char *s, char **rfn);
+int input_isinclude(craisin_state_t *as);
+
+int craisin_next_context(craisin_state_t *as);
+void craisin_emit(line_t *cl, int byte);
+void craisin_emitop(line_t *cl, int opc);
+
+void craisin_save_expr(line_t *cl, int id, expr_t expr);
+expr_t craisin_fetch_expr(line_t *cl, int id);
+expr_t craisin_parse_expr(craisin_state_t *as, char **p);
+int craisin_emitexpr(line_t *cl, expr_t expr, int s);
+int craisin_reduce_expr(craisin_state_t *as, expr_t expr);
+expr_t craisin_parse_cond(craisin_state_t *as, char **p);
+
+
+//-----------------------------------------------------------------------------
 
 #endif
 
