@@ -27,7 +27,7 @@ DASH    equ $6d
 COLON   equ $7a
 DOT     equ $6e
 
-display
+display:
 		fcb SPACE,SPACE,SPACE,SPACE,'C,'O,'C,'O,SPACE,'A,'S,'S,'E,'M,'B
 		fcb 'L,'E,'R,SPACE,'T,'E,'S,'T,SPACE,SPACE,SPACE,SPACE
 		fcb SPACE,SPACE,SPACE,SPACE,'C,'O,'C,'O,SPACE,'A,'S,'S,'E,'M,'B
@@ -87,7 +87,7 @@ diserr  equ 457            error count
 dismsg  equ 482            message area
 
 stcktop equ *
-start   orcc #$50          disable interrupts
+start:  orcc #$50          disable interrupts
 		leas stcktop,pcr   initialize the stack pointer
 		leax display,pcr   point SAM to the display
 		tfr x,d
@@ -99,14 +99,14 @@ start   orcc #$50          disable interrupts
 		ldx #samtype
 		ldb #1
 		lbsr sam
-s0		jmp s0
+s0:		jmp s0
 		
-sam     lsra           set .b SAM bits from .a, starting at .x
+sam:    lsra           set .b SAM bits from .a, starting at .x
 		bcs sam1
 		sta ,x
 		bra sam2
-sam1    sta 1,x
-sam2    leax 2,x
+sam1:   sta 1,x
+sam2:   leax 2,x
 		decb
 		bne sam
 		rts
@@ -123,4 +123,3 @@ samsize equ $ffda          memory size
 samtype equ $ffde          memory map type
 
 		end start
-

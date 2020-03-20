@@ -22,21 +22,48 @@
 	#include <string>
 	#include <list>
 
-	#include <argparse.hpp>
 	#include <cpu.hpp>
 	#include <craisin.hpp>
 	#include <error.hpp>
-	
+	#include <utils.hpp>
+
 	#include <expr.hpp>
 	#include <token.hpp>
-	
+
 	using namespace std;
-	
+
 //-----------------------------------------------------------------------------
 
 void craisin_pass_1(craisin_state_t *as) {
+	std::ifstream file(as->input_files->current());
+	char *data;
+	std::list<std::string> lines;
 
-    
+	if (file.is_open()) {
+		file.seekg(0, file.end);
+	    int size = file.tellg();
+	    file.seekg(0, file.beg);
+
+		// Read in all lines of file
+		while (file.tellg() < size) {
+			std::string tmpline;
+			std::getline(file, tmpline);
+			lines.push_back(tmpline);
+		}
+	}
+
+	// Iterate over each line
+	for (std::string line : lines) {
+		size_t index = line.find(":");
+		if (index != std::string::npos) {
+			// Found a possible match
+			std::string token = line.substr(0, index);
+			// Check if the substring has any whitespace
+			if (token.find(" ") == std::string::npos) {
+				Utils::debug_printf("[LABEL] %s\n", token.c_str());
+			}
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------

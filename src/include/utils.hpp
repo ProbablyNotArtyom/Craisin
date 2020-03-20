@@ -30,9 +30,9 @@
 class Utils {
 public:
 	inline static bool flag_debug = false;
-	static void set_debug_state(bool state) {
-		flag_debug = state;
-	}
+	inline static bool flag_verbose = false;
+	static void set_debug_state(bool state) { flag_debug = state; }
+	static void set_verbose_state(bool state) { flag_verbose = state; }
 
 	// base case of recursion, no more arguments
 	static void format_impl(std::stringstream& ss, const char* format) {
@@ -71,6 +71,15 @@ public:
 	template <typename... Args>
 	static void debug_printf(const char* fmt, Args... args) {
 		if (flag_debug) {
+			std::stringstream ss;
+	    	format_impl(ss, fmt, args...);
+			printf(ss.str().c_str());
+		}
+	}
+
+	template <typename... Args>
+	static void verbose_printf(const char* fmt, Args... args) {
+		if (flag_verbose) {
 			std::stringstream ss;
 	    	format_impl(ss, fmt, args...);
 			printf(ss.str().c_str());

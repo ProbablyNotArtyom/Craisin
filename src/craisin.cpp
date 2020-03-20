@@ -60,17 +60,6 @@ struct assembler_pass {
 	{ std::string(), nullptr, 0 }
 };
 
-static std::string helptxt = {
-	"Usage: craisin [options] [sources] \r\n"
-	"6502/65816 assembler supporting variable syntax\r\n"
-	"\r\n"
-	"  -h, --help           shows this help text\r\n"
-	"  -d, --debug          enables debug mode\r\n"
-	"  -v, --verbose        enables verbose logging\r\n"
-	"  -c, --cpu=CPU        uses CPU as the target processor\r\n"
-	"      --vice=FILE      outputs a VICE symbol file to FILE\r\n"
-};
-
 bool flag_debug = false;
 bool flag_verbose = false;
 cpu_model_t craisin_cpu_model;
@@ -121,6 +110,7 @@ int main(int argc, const char *argv[]) {
 	if (parser["--verbose"] == true) {
     	printf("[.] verbosity increased\n");
 		flag_verbose = true;
+		Utils::set_verbose_state(true);
 	}
 	if (parser.present<std::string>("--cpu")) {
 		craisin_cpu_model = cpu_get_model(parser.get<std::string>("--cpu"));
@@ -159,7 +149,8 @@ int main(int argc, const char *argv[]) {
 	} catch (std::logic_error& e) { printf("No files provided\n"); exit(0); }
 
 	for (int pass = 0; !passlist[pass].name.empty(); pass++) {
-		Utils::debug_printf("%s\n", passlist[pass].name);
+		Utils::verbose_printf("[pass %d] %s\n", pass+1, assembler_state.input_files->current());
+		(passlist[pass].fn)(&assembler_state);
 	}
 }
 

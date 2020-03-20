@@ -55,6 +55,7 @@ void StringList::reset(void) {
 
 void StringList::pop(void) {
 	strings.pop_back();
+	nstrings--;
 }
 
 std::string StringList::top(void) {
@@ -63,6 +64,7 @@ std::string StringList::top(void) {
 
 void StringList::push(std::string str) {
 	strings.push_back(str);
+	nstrings++;
 }
 
 std::string StringList::current(void) {
