@@ -16,22 +16,11 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <ctype.h>
+	#include <string>
+	#include <sstream>
 	#include <iostream>
-	#include <fstream>
-	#include <unistd.h>
-	#include <string.h>
-	#include <list>
-
-	#include <argparse.hpp>
-	#include <cpu.hpp>
+	#include <type_traits>
 	#include <craisin.hpp>
-
-	using namespace std;
-//
-//-----------------------------------------------------------------------------
-
-craisin_symbol_t *register_symbol(craisin_state_t *as, line_t *cl, char *sym, expr_t value, int flags) { }
-craisin_symbol_t *lookup_symbol(craisin_state_t *as, line_t *cl, char *sym) { }
+	#include <utils.hpp>
 
 //-----------------------------------------------------------------------------

@@ -9,7 +9,7 @@ TESTDIR := $(BASEDIR)/test
 
 CCP := g++
 LD := ld
-CCFLAGS := -Wall -I $(INCDIR) -I $(SRCDIR)/parse
+CCFLAGS := -std=c++17 -Wall -I $(INCDIR) -I $(SRCDIR)/parse
 LDLIBS := -lc -lm
 LDFLAGS :=
 

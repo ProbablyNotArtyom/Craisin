@@ -17,39 +17,50 @@
  */
 
 	#include <iostream>
+	#include <sstream>
 	#include <fstream>
 	#include <unistd.h>
 	#include <string>
+	#include <memory>
+	#include <filesystem>
 	#include <list>
+	#include <cstdarg>
 
 	#include <argparse.hpp>
 	#include <cpu.hpp>
 	#include <craisin.hpp>
+	#include <utils.hpp>
 	#include <error.hpp>
-	
-	#include "parse/expr.hpp"
-	#include "parse/token.hpp"
-	
-	using namespace std;
-	
+
+	#include <expr.hpp>
+	#include <token.hpp>
+
 //-----------------------------------------------------------------------------
 
+void craisin_pass_1(craisin_state_t *as);
+void craisin_pass_2(craisin_state_t *as);
+void craisin_pass_3(craisin_state_t *as);
+void craisin_pass_4(craisin_state_t *as);
+void craisin_pass_5(craisin_state_t *as);
+void craisin_pass_6(craisin_state_t *as);
+void craisin_pass_7(craisin_state_t *as);
+
 struct assembler_pass {
-	const string	name;
-	const pass_fn_t	fn;
-	const int 		fordep;
+	const std::string	name;
+	const pass_fn_t		fn;
+	const int 			fordep;
 } passlist[] = {
-	{ string("parse"), nullptr, 1 },
-	{ string("symcheck"), nullptr, 0 },
-	{ string("resolve1"), nullptr, 0 },
-	{ string("resolve2"), nullptr, 0 },
-	{ string("addressresolve"), nullptr, 0 },
-	{ string("finalize"), nullptr, 0 },
-	{ string("emit"), nullptr, 0 },
-	{ string(), nullptr, 0 }
+	{ std::string("parse"), craisin_pass_1, 1 },
+	{ std::string("symcheck"), craisin_pass_2, 0 },
+	{ std::string("resolve1"), craisin_pass_3, 0 },
+	{ std::string("resolve2"), craisin_pass_4, 0 },
+	{ std::string("addressresolve"), craisin_pass_5, 0 },
+	{ std::string("finalize"), craisin_pass_6, 0 },
+	{ std::string("emit"), craisin_pass_7, 0 },
+	{ std::string(), nullptr, 0 }
 };
 
-static string helptxt = {
+static std::string helptxt = {
 	"Usage: craisin [options] [sources] \r\n"
 	"6502/65816 assembler supporting variable syntax\r\n"
 	"\r\n"
@@ -60,60 +71,95 @@ static string helptxt = {
 	"      --vice=FILE      outputs a VICE symbol file to FILE\r\n"
 };
 
-static struct option craisin_options[] = {
-	{"help", no_argument, 0, 'h'},
-	{"debug", no_argument, 0, 'd'},
-	{"verbose", no_argument, 0, 'v'},
-	{"cpu", required_argument, 0, 'c'},
-	{"vice", required_argument, 0, 0},
-	{0, 0, 0, 0}
-};
-
 bool flag_debug = false;
 bool flag_verbose = false;
 cpu_model_t craisin_cpu_model;
 
 //-----------------------------------------------------------------------------
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
 	// Parse the command line options and handle flags
-	while (1) {
-	    int option_index = 0;
-		int opt = argparse_long(argc, argv, "hdvc:", craisin_options, &option_index);
-	    if (opt == -1) break;
+	using namespace argparse;
+	ArgumentParser parser("Craisin");
+	parser.add_description("\n6502/65816 assembler supporting variable syntax");
+	parser.add_argument("-h", "--help")
+		.help("shows this help text")
+		.default_value(false)
+		.implicit_value(true);
+	parser.add_argument("-d", "--debug")
+		.help("enables debug mode")
+		.default_value(false)
+		.implicit_value(true);
+	parser.add_argument("-v", "--verbose")
+		.help("enables verbose logging")
+		.default_value(false)
+		.implicit_value(true);
+	parser.add_argument("-c", "--cpu")
+		.help("uses CPU as the target processor");
+	parser.add_argument("--vice")
+		.help("outputs a VICE symbol file to FILE");
+	parser.add_argument("files")
+		.help("input files")
+		.remaining();
 
-		switch (opt) {
-			default:
-			case 'h':
-				cerr << helptxt;
-				exit(0);
-			case 'd':
-				flag_debug = true;
-				break;
-			case 'v':
-				flag_verbose = true;
-			    break;
-			case 'c':
-				craisin_cpu_model = cpu_get_model(optarg);
-				if (craisin_cpu_model == CPU_INVALID) {
-					cerr << "[!] Invalid CPU model";
-					exit(0);
-				} else if (flag_debug) {
-					cout << "CPU model: " << cpu_get_model_string(craisin_cpu_model) << "\n";
-				}
-				break;
-			case 0:
-				/* Parse arguments that only have long forms */
-				if (craisin_options[option_index].name == string("vice")) {
-					if (flag_debug) cout << "VICE output file: "<< optarg << "\n";
-				}
-				break;
-		}
+	try { parser.parse_args(argc, argv);}
+	catch (const std::runtime_error& err) {
+    	std::cout << err.what() << std::endl;
+    	std::cout << parser;
+    	exit(0);
+  	}
+
+	if (parser["--help"] == true) {
+    	std::cout << parser << std::endl;
+		exit(0);
 	}
-	
+	if (parser["--debug"] == true) {
+    	printf("[.] debug enabled\n");
+		flag_debug = true;
+		Utils::set_debug_state(true);
+	}
+	if (parser["--verbose"] == true) {
+    	printf("[.] verbosity increased\n");
+		flag_verbose = true;
+	}
+	if (parser.present<std::string>("--cpu")) {
+		craisin_cpu_model = cpu_get_model(parser.get<std::string>("--cpu"));
+		if (craisin_cpu_model == CPU_INVALID) {
+			printf("[!] Invalid CPU model\n");
+			exit(0);
+		} else Utils::debug_printf("[.] CPU model: %s\n", cpu_get_model_string(craisin_cpu_model).c_str());
+	}
+	if (parser.present<std::string>("--vice")) {
+    	Utils::debug_printf("[.] VICE output file: %s\n", parser.get<std::string>("--vice").c_str());
+	}
+
 	// Crasin now begins
+	craisin_state_t assembler_state;
+	// Create various string lists
+	if (!assembler_state.file_dir) delete assembler_state.file_dir;
+	if (!assembler_state.includelist) delete assembler_state.includelist;
+	if (!assembler_state.input_files) delete assembler_state.input_files;
+	assembler_state.file_dir = new StringList();
+	assembler_state.includelist = new StringList();
+	assembler_state.input_files = new StringList();
+
+	try {
+		auto files = parser.get<std::vector<std::string>>("files");
+		// Print out all the filenames passed in
+		Utils::debug_printf("[.] files provided: ");
+		for (auto& file : files) { Utils::debug_printf("%s ", file.c_str()); }
+		Utils::debug_printf("\n");
+		// Now check that each file exists before inserting it into the input list
+	    for (auto& file : files) {
+			if (std::filesystem::exists(file.c_str()))
+				assembler_state.input_files->push(file);
+			else
+				printf("[!] %s : %s\n", strerror(errno), file.c_str());
+		}
+	} catch (std::logic_error& e) { printf("No files provided\n"); exit(0); }
+
 	for (int pass = 0; !passlist[pass].name.empty(); pass++) {
-		if (flag_debug) cout << passlist[pass].name << '\n';
+		Utils::debug_printf("%s\n", passlist[pass].name);
 	}
 }
 
@@ -121,15 +167,6 @@ void skip_operand_real(line_t *cl, char **p) {
 	if (CURPRAGMA(cl, PRAGMA_NEWSOURCE)) return;
 	for (; **p && !isspace(**p); (*p)++);
 }
-
-
-void input_init(craisin_state_t *as) { }
-void input_openstring(craisin_state_t *as, char *s, char *str) { }
-void input_open(craisin_state_t *as, char *s) { }
-char *input_readline(craisin_state_t *as) { }
-char *input_curspec(craisin_state_t *as) { }
-FILE *input_open_standalone(craisin_state_t *as, char *s, char **rfn) { }
-int input_isinclude(craisin_state_t *as) { }
 
 int craisin_next_context(craisin_state_t *as) { }
 void craisin_emit(line_t *cl, int byte) { }

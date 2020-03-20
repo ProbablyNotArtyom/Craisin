@@ -19,11 +19,16 @@
 #ifndef HEADER_CRAISIN
 #define HEADER_CRAISIN
 
+	#include <string>
+	#include <sstream>
+	#include <iostream>
+	#include <type_traits>
 	#include <stack>
 	#include <list>
 	#include <expr.hpp>
 	#include <error.hpp>
-	
+	#include <stringlist.hpp>
+
 //-----------------------------------------------------------------------------
 
 /* Characters that can start a valid symbol */
@@ -50,11 +55,22 @@ typedef struct craisin_error craisin_error_t;
 
 enum output_format {
 	OUTPUT_FMT_STD = 0,			// Output to STDOUT
-	OUTPUT_FMT_BIN,				// Generic binary 
+	OUTPUT_FMT_BIN,				// Generic binary
 	OUTPUT_FMT_IHEX,
 	OUTPUT_FMT_SREC				// Motorola SRecord
 };
 
+enum craisin_flags {
+	FLAG_NONE 					= 0,
+	FLAG_LIST					= 1 << 1,
+	FLAG_DEPEND					= 1 << 2,
+	FLAG_SYMBOLS				= 1 << 3,
+	FLAG_DEPENDNOERR			= 1 << 4,
+	FLAG_UNICORNS				= 1 << 5,
+	FLAG_MAP					= 1 << 6,
+	FLAG_SYMBOLS_NOLOCALS		= 1 << 7,
+	FLAG_AUDIT					= 1 << 8
+};
 //-----------------------------------------------------------------------------
 
 enum {
@@ -66,12 +82,12 @@ enum {
 	PRAGMA_CPU_65816			= 1<<4,
 	PRAGMA_EXPORT_ALL			= 1<<5,		// Export all symbols
 	PRAGMA_IMPORT_UNDEF			= 1<<6,		// Import symbols that are undefined when exporting
-	
+
 	PRAGMA_CESCAPES				= 1<<7,		// Interpret C style escape sequences in strings
 	PRAGMA_TESTMODE				= 1<<8,		// Enable testmode
-	PRAGMA_NEWSOURCE			= 1<<9,		
+	PRAGMA_NEWSOURCE			= 1<<9,
 	PRAGMA_CLEARBIT				= 1<<10,
-	
+
 	PRAGMA_NEGATED				= 1<<31		// Pragma flag test bit
 } pragma_t;
 
@@ -139,8 +155,7 @@ struct sym_export {
 };
 
 typedef std::list<struct sym_export> exportlist_t;
-typedef std::list<std::string> stringlist_t;
-
+typedef std::stack<std::string> stacklist_t;
 typedef std::list<struct craisin_struct> structlist_t;
 typedef struct craisin_struct_field struct_field_t;
 typedef struct craisin_struct craisin_struct_t;
@@ -211,10 +226,10 @@ struct craisin_line {
 	int dsize;							// set to 1 for 8 bit dshow value
 	int isbrpt;							// set to 1 if this line is a branch point
 	craisin_symbol_t *dptr;				// symbol value to display
-	
+
 	int noexpand_start;					// start of a no-expand block
 	int noexpand_end;					// end of a no-expand block
-	int hideline;						// set if we're going to hide this line on output	
+	int hideline;						// set if we're going to hide this line on output
 };
 
 struct craisin_state {
@@ -230,7 +245,7 @@ struct craisin_state {
 	int instruct;						// are w in a structure?
 	int skipcond;						// skipping a condition?
 	int skipcount;						// depth of "skipping"
-	int skipmacro;						// are we skipping in a macro?	
+	int skipmacro;						// are we skipping in a macro?
 	int endseen;						// have we seen an "end" pseudo?
 	int execaddr;						// address from "end"
 	int inmod;							// inside an os9 module?
@@ -239,36 +254,36 @@ struct craisin_state {
 	unsigned char crc[3];				// crc accumulator
 	int cycle_total;					// cycle count accumulator
 	int badsymerr;						// throw error on undef sym if set
-	
+
 	line_t *line_head;					// start of lines list
 	line_t *line_tail;					// tail of lines list
-	
+
 	line_t *cl;							// current line pointer
-	
+
 	craisin_section_t *csect;			// current section
-	
+
 	int context;						// the current "context"
 	int nextcontext;					// the next available context
-	
+
 	symbollist_t symtab;				// meta data for the symbol table
 	macrolist_t *macros;				// macro table
 	sectionlist_t *sections;			// section table
 	exportlist_t *exportlist;			// list of exported symbols
-	stringlist_t importlist;			// list of imported symbols
+	StringList *importlist;				// list of imported symbols
 	char *list_file;					// name of file to list to
 	char *audit_file;					// name of file to output used features to
 	int tabwidth;						// tab width in list file
 	char *map_file;						// name of map file
-	char *output_file;					// output file name	
-	stringlist_t input_files;			// files to assemble
+	char *output_file;					// output file name
+	StringList *input_files;			// files to assemble
 	void *input_data;					// opaque data used by the input system
-	stringlist_t include_list;			// include paths
-	stringlist_t file_dir;				// stack of the "current file" dir
-	stringlist_t includelist;
-	
+	StringList *include_list;			// include paths
+	StringList *file_dir;				// stack of the "current file" dir
+	StringList *includelist;
+
 	structlist_t structs;				// defined structures
 	craisin_struct_t *cstruct;			// current structure
-	expr_t savedaddr;					// old address counter before struct started	
+	expr_t savedaddr;					// old address counter before struct started
 	int exportcheck;					// set if we need to collapse out the section base to 0
 	int passno;							// set to the current pass number
 	int preprocess;						// set if we are prepocessing
@@ -289,6 +304,8 @@ void skip_operand_real(line_t *cl, char **p);
 
 //-----------------------------------------------------------------------------
 
+void debug_printf(const char *fmt...);
+
 craisin_symbol_t *register_symbol(craisin_state_t *as, line_t *cl, char *sym, expr_t value, int flags);
 craisin_symbol_t *lookup_symbol(craisin_state_t *as, line_t *cl, char *sym);
 void register_struct_entry(craisin_state_t *as, line_t *l, int size, craisin_struct_t *ss);
@@ -303,6 +320,12 @@ char *input_curspec(craisin_state_t *as);
 FILE *input_open_standalone(craisin_state_t *as, char *s, char **rfn);
 int input_isinclude(craisin_state_t *as);
 
+typedef void * craisin_stack_t;
+void craisin_stack_destroy(craisin_stack_t S);
+void *craisin_stack_top(craisin_stack_t S);
+void *craisin_stack_pop(craisin_stack_t S);
+void craisin_stack_push(craisin_stack_t S, void *item);
+
 int craisin_next_context(craisin_state_t *as);
 void craisin_emit(line_t *cl, int byte);
 void craisin_emitop(line_t *cl, int opc);
@@ -314,12 +337,6 @@ int craisin_emitexpr(line_t *cl, expr_t expr, int s);
 int craisin_reduce_expr(craisin_state_t *as, expr_t expr);
 expr_t craisin_parse_cond(craisin_state_t *as, char **p);
 
-
 //-----------------------------------------------------------------------------
 
 #endif
-
-
-
-
-

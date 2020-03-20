@@ -16,22 +16,41 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <ctype.h>
+#ifndef HEADER_STRLIST
+#define HEADER_STRLIST
+
 	#include <iostream>
 	#include <fstream>
 	#include <unistd.h>
-	#include <string.h>
+	#include <string>
+	#include <vector>
 	#include <list>
 
-	#include <argparse.hpp>
-	#include <cpu.hpp>
-	#include <craisin.hpp>
-
-	using namespace std;
-//
-//-----------------------------------------------------------------------------
-
-craisin_symbol_t *register_symbol(craisin_state_t *as, line_t *cl, char *sym, expr_t value, int flags) { }
-craisin_symbol_t *lookup_symbol(craisin_state_t *as, line_t *cl, char *sym) { }
+	#include <stack>
+	#include <list>
+	#include <expr.hpp>
+	#include <error.hpp>
 
 //-----------------------------------------------------------------------------
+
+class StringList {
+public:
+	StringList(void);
+	~StringList(void);
+	void addstring(std::string str);
+	void reset(void);
+	void pop(void);
+	void push(std::string str);
+	std::string top(void);
+	std::string current(void);
+	std::string next(void);
+	int get_nstrings(void);
+	StringList* copy(void);
+
+public:
+	std::vector<std::string>	strings;	// List of strings
+	int 						nstrings;	// Number of strings
+	int							cstring;	// Current stringlist index
+};
+
+#endif

@@ -16,7 +16,6 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-	#include <language.hpp>
 	#include <ctype.h>
 	#include <iostream>
 	#include <fstream>
@@ -29,9 +28,9 @@
 	#include <craisin.hpp>
 
 	using namespace std;
-	
-//-----------------------------------------------------------------------------	
-	
+
+//-----------------------------------------------------------------------------
+
 int parse_pragma_helper(char *p);
 
 //-----------------------------------------------------------------------------

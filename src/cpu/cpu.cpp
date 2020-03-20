@@ -4,9 +4,9 @@
 	#include <string>
 	#include <../../mnt/Keep2/Projects/builds/Craisin/src/include/cpu.hpp>
 	#include <cpu.hpp>
-	
+
 	using namespace std;
-	
+
 //-----------------------------------------------------------------------------
 
 const string cpuModels_tbl[NUM_CPU_MODELS] {

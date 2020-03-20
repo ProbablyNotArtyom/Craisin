@@ -16,7 +16,6 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <language.hpp>
 #include <ctype.h>
 #include <iostream>
 #include <fstream>
@@ -30,7 +29,7 @@
 
 using namespace std;
 
-//-----------------------------------------------------------------------------	
+//-----------------------------------------------------------------------------
 
 expr_t craisin_expr_create(void) { }
 void craisin_expr_destroy(expr_t E) { }
