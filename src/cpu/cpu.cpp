@@ -2,7 +2,7 @@
 	#include <stddef.h>
 	#include <stdio.h>
 	#include <string>
-	#include <../../mnt/Keep2/Projects/builds/Craisin/src/include/cpu.hpp>
+	#include <../include/cpu.hpp>
 	#include <cpu.hpp>
 
 	using namespace std;
